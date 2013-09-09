@@ -52,11 +52,7 @@ class Logicmonitor
                 raise "Received unexpected HTTP status #{g.status} Response Body: #{g.body_str}"
             end
 
-            res = MultiJson.load(g.body_str) or raise Logicmonitor::Simple::Error "Received invalid JSON from LogicMonitor"
-            if res['status'] && res['status'].to_i > 200
-                raise "Error from LogicMonitor - #{res['errmsg']}"
-            end
-            res
+            MultiJson.load(g.body_str) or raise Logicmonitor::Simple::Error "Received invalid JSON from LogicMonitor"
         end
     end
 end
