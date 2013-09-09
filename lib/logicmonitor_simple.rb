@@ -19,11 +19,9 @@ require 'awrence'
 require 'curb'
 require 'multi_json'
 
+
 class Logicmonitor
     class Simple
-        class Error < Exception
-        end
-
         def initialize(domain, username, password)
             @domain   = domain
             @username = username
@@ -34,8 +32,12 @@ class Logicmonitor
 
         def method_missing(method, *args)
             method = method.to_s.split('_').each_with_index.map { |e,i| i>0 ? e.capitalize : e }.join
-            http_args = args[0].to_camelback_keys.map { |k,v| "#{k}=#{v}" }.join('&') rescue []
-
+            http_args = args[0].to_camelback_keys.map do |k,v|
+              if v.is_a? Array
+                  v = v.join(',')
+              end
+              "#{k}=#{v}"
+            end.join('&') rescue []
             g = Curl.get("https://#{@domain}.logicmonitor.com/santaba/rpc/#{method}?#{http_args}") do |http|
                 if @cookies.size > 0
                     http.headers['Cookie'] = @cookies.join('; ')
@@ -47,9 +49,14 @@ class Logicmonitor
             end
 
             if g.status.to_i > 399
-                raise Logicmonitor::Simple::Error, "Received unexpected status #{g.status} Response Body: #{g.body_str}"
+                raise "Received unexpected HTTP status #{g.status} Response Body: #{g.body_str}"
             end
-            MultiJson.load(g.body_str)
+
+            res = MultiJson.load(g.body_str) or raise Logicmonitor::Simple::Error "Received invalid JSON from LogicMonitor"
+            if res['status'] && res['status'].to_i > 200
+                raise "Error from LogicMonitor - #{res['errmsg']}"
+            end
+            res
         end
     end
 end
