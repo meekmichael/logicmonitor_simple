@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'logicmonitor_simple'
-  s.version     = '0.1.0'
-  s.date        = '2013-09-06'
+  s.version     = '0.1.1'
+  s.date        = '2013-09-10'
   s.summary     = "Simple API client for LogicMonitor"
   s.description = "Simple API client for LogicMonitor"
   s.authors     = ["Michael Mittelstadt"]
