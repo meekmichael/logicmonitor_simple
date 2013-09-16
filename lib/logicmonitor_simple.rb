@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 #
-# Simple LogicMonitor API library
+# Simple LogicMonitor API library - a spartan wrapper around the LogicMonitor API
 #
 # Author: Michael Mittelstadt (<meek@getsatisfaction.com>)
-# Version: 0.1.0
+# Version: 0.1.2
 #
 # Usage:
 #
@@ -18,9 +18,9 @@
 require 'awrence'
 require 'curb'
 require 'multi_json'
+require 'cgi'
 
-
-class Logicmonitor
+module Logicmonitor
     class Simple
         def initialize(domain, username, password)
             @domain   = domain
@@ -36,8 +36,8 @@ class Logicmonitor
               if v.is_a? Array
                   v = v.join(',')
               end
-              "#{k}=#{v}"
-            end.join('&') rescue []
+              "#{CGI.escape(k.to_s)}=#{CGI.escape(v.to_s)}"
+            end.join('&') rescue ""
             g = Curl.get("https://#{@domain}.logicmonitor.com/santaba/rpc/#{method}?#{http_args}") do |http|
                 if @cookies.size > 0
                     http.headers['Cookie'] = @cookies.join('; ')
